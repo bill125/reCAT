@@ -17,7 +17,9 @@ round2 = function(x, n) {
   z*posneg
 }
 
-bestEnsembleComplexTSP <- function(test_exp, stageIdxSmp = NULL, TSPFold = 2, beginNum = 10, endNum = 198, output = TRUE, debug = FALSE, name = "", threads = 1, clustMethod = "GMM", base_cycle_range = c(6:9), step_size = 2, max_loop = NULL, max_num = 300)
+bestEnsembleComplexTSP <- function(test_exp, stageIdxSmp = NULL, TSPFold = 2, beginNum = 10, endNum = 198, output = TRUE, 
+																	 debug = FALSE, name = "", threads = 1, clustMethod = "GMM", base_cycle_range = c(6:9), 
+																	 step_size = 2, max_loop = NULL, max_num = 300, double_boost = TRUE)
 {
 	if (debug == TRUE)
 		message("Task Begin! ")
@@ -44,10 +46,20 @@ bestEnsembleComplexTSP <- function(test_exp, stageIdxSmp = NULL, TSPFold = 2, be
 	#print(tmpResultLst)
 	beginNum <- max(base_cycle_range)
 	if(endNum > 500){
-	 endNum <- max_num
+	 endNum <- 500
 	}
-	
-  if(is.null(max_loop))
+	if (double_boost) {
+		total_rows <- round2((log(endNum/beginNum) / log(step_size)), 0)
+	  resultLst <- matrix(0, nrow = total_rows, ncol = nrow(test_exp))
+	  normalizedResultLst <- matrix(0, nrow = total_rows, ncol = nrow(test_exp))
+	  ensembleResultLst <- matrix(0, nrow = total_rows, ncol = nrow(test_exp))
+		seq_list <- seq(from = round2(beginNum*step_size, 0), to = endNum, length.out=total_rows-1)
+		for (i in 2:(total_rows-1))	 {
+			seq_list[i] = round2(seq_list[i-1]*step_size, 0)-1
+		}
+		print(seq_list)
+	}
+	else if(is.null(max_loop))
 	{
     s1 <- (endNum - beginNum) %% step_size
 	  total_rows <- round2(((endNum - beginNum - s1) / step_size), 0) + 1 #+ s1
